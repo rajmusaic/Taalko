@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Music Player (Only Image Background)</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;font-family: Arial;}
+  body{overflow:hidden;}
+
+  .app{
+    position:relative;
+    width:100vw;
+    height:100vh;
+    overflow:hidden;
+  }
+.btn{
+  width:65px;
+  height:65px;
+  border-radius:50%;
+  border:none;
+  background: rgba(0,0,0,0.4);
+  color:#fff;
+  font-size:25px;
+  cursor:pointer;
+  transition: transform .2s ease, background .2s ease;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+
+  outline: none;                    /* remove outline */
+  box-shadow: none !important;      /* remove blue shadow */
+  -webkit-tap-highlight-color: transparent;  /* remove mobile blue */
+}
+  /* BACKGROUND IMAGE ONLY */
+  .bgImage{
+    position:absolute; inset:0;
+    background-size:cover;
+    background-position:center;
+    opacity:1;
+  }
+
+  /* Player */
+  .player{
+    position:absolute; inset:0;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    transition: transform 0.6s cubic-bezier(.2,.8,.2,1);
+    z-index:2;
+    background: rgba(0,0,0,0.4);
+    backdrop-filter: blur(4px);
+  }
+
+  .cover{
+    width:260px;
+    height:260px;
+    overflow:hidden;
+    box-shadow:0 20px 40px rgba(0,0,0,0.6);
+    margin-bottom:20px;
+    border-radius:0px;
+    border: 4px solid rgba(255,255,255,0.2);
+  }
+  .cover img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    border-radius:0px;
+  }
+
+  .songInfo{
+    text-align:center;
+    color:#fff;
+    margin-bottom:10px;
+  }
+  .songInfo h2{font-size:22px;}
+  .songInfo p{font-size:14px; color:#ddd;}
+
+  .seek{
+    width:90%;
+    margin:10px 0;
+  }
+  input[type="range"]{
+    width:100%;
+    accent-color:#00d4ff;
+  }
+
+  .time{
+    width: 90%;
+    display:flex;
+    justify-content:space-between;
+    font-size:12px;
+    color:#ddd;
+  }
+
+  .controls{
+    display:flex;
+    gap:40px;
+    margin-top:15px;
+  }
+  .btn{
+    width:65px; height:65px;
+    border-radius:50%;
+    border:none;
+    background: rgba(0,0,0,0.4);
+    color:#fff;
+    font-size:25px;
+    cursor:pointer;
+    transition: transform .2s ease, background .2s ease;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+  }
+  .btn:hover{transform:scale(1.08); background: rgba(0,0,0,0.6);}
+  .btn.playing{background: linear-gradient(135deg, #000, #00d4ff);}
+
+  /* Song list */
+  .list{
+    position:absolute;
+    top:100%;
+    left:0;
+    width:100%;
+    height:100%;
+    padding:20px;
+    overflow:auto;
+    z-index:3;
+    background: rgba(0,0,0,0.45);
+    backdrop-filter: blur(8px);
+    transition: transform 0.6s cubic-bezier(.2,.8,.2,1);
+  }
+  .list h2{
+    color:#fff;
+    margin-bottom:15px;
+  }
+  .song{
+    display:flex;
+    align-items:center;
+    gap:15px;
+    padding:15px;
+    border-bottom:1px solid rgba(255,255,255,0.15);
+    cursor:pointer;
+  }
+  .song:hover{background: rgba(255,255,255,0.08);}
+  .song img{width:50px;height:50px;border-radius:12px;}
+  .song .info strong{color:#fff;}
+  .song .info span{color:#ddd; font-size:12px;}
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- BACKGROUND IMAGE -->
+  <div class="bgImage" id="bgImage"></div>
+
+  <!-- Player -->
+  <div class="player" id="player">
+    <div class="cover">
+      <img id="coverImg" src="https://via.placeholder.com/250" alt="Cover" />
+    </div>
+
+    <div class="songInfo">
+      <h2 id="songTitle">Song 1</h2>
+      <p id="songArtist">Artist 1</p>
+    </div>
+
+    <div class="seek">
+      <input type="range" id="seekBar" min="0" max="100" value="0">
+    </div>
+
+    <div class="time">
+      <span id="currentTime">00:00</span>
+      <span id="totalTime">00:00</span>
+    </div>
+
+    <div class="controls">
+      <button class="btn" id="prev"><i class="fa-solid fa-backward-step"></i></button>
+      <button class="btn" id="play"><i class="fa-solid fa-play"></i></button>
+      <button class="btn" id="next"><i class="fa-solid fa-forward-step"></i></button>
+    </div>
+  </div>
+
+  <!-- Song List -->
+  <div class="list" id="list">
+    <h2>Song List</h2>
+    <div id="songList"></div>
+  </div>
+
+</div>
+
+<!-- IMPORT SONGS FROM songs.js -->
+<script src="s.js"></script>
+
+<script>
+  /*************** ADMIN CONFIG (Only Code Change) ***************/
+  const adminConfig = {
+    bgImageUrl: "5.jpg"
+  };
+  /************************************************************/
+
+  // Apply background image
+  document.getElementById("bgImage").style.backgroundImage = url(${adminConfig.bgImageUrl});
+
+  // SONGS DATA (Now imported from songs.js)
+  let currentIndex = 0;
+  let isPlaying = false;
+
+  const audio = new Audio();
+  const coverImg = document.getElementById("coverImg");
+  const playBtn = document.getElementById("play");
+  const prevBtn = document.getElementById("prev");
+  const nextBtn = document.getElementById("next");
+  const seekBar = document.getElementById("seekBar");
+  const songList = document.getElementById("songList");
+
+  const songTitle = document.getElementById("songTitle");
+  const songArtist = document.getElementById("songArtist");
+  const currentTimeEl = document.getElementById("currentTime");
+  const totalTimeEl = document.getElementById("totalTime");
+
+  const player = document.getElementById("player");
+  const list = document.getElementById("list");
+
+  function loadSong(index){
+    const song = songs[index];
+    audio.src = song.url;
+    coverImg.src = song.cover;
+    songTitle.innerText = song.title;
+    songArtist.innerText = song.artist;
+  }
+
+  function formatTime(sec){
+    const minutes = Math.floor(sec / 60);
+    const seconds = Math.floor(sec % 60);
+    return ${minutes < 10 ? "0"+minutes : minutes}:${seconds < 10 ? "0"+seconds : seconds};
+  }
+
+  function playPause(){
+    if(!isPlaying){
+      audio.play();
+      isPlaying = true;
+      playBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+      playBtn.classList.add("playing");
+    } else {
+      audio.pause();
+      isPlaying = false;
+      playBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
+      playBtn.classList.remove("playing");
+    }
+  }
+
+  function nextSong(){
+    currentIndex = (currentIndex + 1) % songs.length;
+    loadSong(currentIndex);
+    if(isPlaying) audio.play();
+  }
+
+  function prevSong(){
+    currentIndex = (currentIndex - 1 + songs.length) % songs.length;
+    loadSong(currentIndex);
+    if(isPlaying) audio.play();
+  }
+
+  audio.addEventListener("timeupdate", () => {
+    const progress = (audio.currentTime / audio.duration) * 100;
+    seekBar.value = progress || 0;
+    currentTimeEl.innerText = formatTime(audio.currentTime);
+  });
+
+  audio.addEventListener("loadedmetadata", () => {
+    totalTimeEl.innerText = formatTime(audio.duration);
+  });
+
+  // AUTO NEXT SONG AFTER COMPLETE
+  audio.addEventListener("ended", nextSong);
+
+  seekBar.addEventListener("input", () => {
+    audio.currentTime = (seekBar.value / 100) * audio.duration;
+  });
+
+  songs.forEach((song, index) => {
+    const div = document.createElement("div");
+    div.className = "song";
+    div.innerHTML = 
+      <img src="${song.cover}" alt="cover">
+      <div class="info">
+        <strong>${song.title}</strong>
+        <span>${song.artist}</span>
+      </div>
+    ;
+    div.addEventListener("click", () => {
+      currentIndex = index;
+      loadSong(currentIndex);
+      audio.play();
+      isPlaying = true;
+      playBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+      playBtn.classList.add("playing");
+    });
+    songList.appendChild(div);
+  });
+
+  loadSong(currentIndex);
+
+  playBtn.addEventListener("click", playPause);
+  nextBtn.addEventListener("click", nextSong);
+  prevBtn.addEventListener("click", prevSong);
+
+  // SWIPE
+  let startY = 0;
+  let isListOpen = false;
+
+  document.addEventListener("touchstart", (e) => {
+    startY = e.touches[0].clientY;
+  });
+
+  document.addEventListener("touchend", (e) => {
+    const endY = e.changedTouches[0].clientY;
+    const diff = endY - startY;
+
+    if(diff > 50 && !isListOpen){
+      player.style.transform = "translateY(-100%)";
+      list.style.transform = "translateY(-100%)";
+      isListOpen = true;
+    } else if(diff < -50 && isListOpen){
+      player.style.transform = "translateY(0)";
+      list.style.transform = "translateY(0)";
+      isListOpen = false;
+    }
+  });
+</script>
+
+</body>
+</html>
