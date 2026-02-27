@@ -1,4 +1,4 @@
-// Babu bro, yahan aapka updated songs data hai!
+// Babu bro, ye lo fixed code with direct working links!
 const songs = [
   {
     name: "Bul Bul",
@@ -25,40 +25,39 @@ const songs = [
     cover: "https://files.catbox.moe/447ej0.png"
   },
   {
-    name: "Khuja Mat",
+    name: "Khuja mat",
     artist: "MC Stan",
     url: "https://raw.githubusercontent.com/rajmusaic/song_x2/main/Khuja%20Mat_x2.mp3",
     cover: "https://files.catbox.moe/e68mcm.png"
   },
   {
     name: "LAZANUS",
-    artist: "Emiway Bantai",
+    artist: "Emiway bantai",
     url: "https://raw.githubusercontent.com/rajmusaic/song_x2/main/LAZANUS_x2.mp3",
     cover: "https://files.catbox.moe/40wf15.png"
   },
   {
     name: "Machayenge 4",
-    artist: "Emiway Bantai",
+    artist: "Emiway bantai",
     url: "https://raw.githubusercontent.com/rajmusaic/song_x2/main/Machayenge%204_2x.mp3",
     cover: "https://files.catbox.moe/ttf1io.png"
   },
   {
-    name: "Nusta Paisa",
+    name: "NustaPaisa.",
     artist: "MC Stan",
     url: "https://raw.githubusercontent.com/rajmusaic/song_x2/main/nustaPaisa_2x.mp3",
     cover: "https://files.catbox.moe/xpmnui.png"
   },
   {
     name: "ROKO 2MG",
-    artist: "Emiway Bantai",
+    artist: "Emiway bantai",
     url: "https://raw.githubusercontent.com/rajmusaic/song_x2/main/ROKO-2MG_x2.mp3",
     cover: "https://files.catbox.moe/i6pnas.png"
   },
   {
     name: "Chusamba",
-    artist: "Emiway Bantai",
+    artist: "Emiway bantai",
     url: "https://raw.githubusercontent.com/rajmusaic/song_2x/main/Chusamba_x2.mp3",
     cover: "https://files.catbox.moe/hymu7e.png"
   }
 ];
-
