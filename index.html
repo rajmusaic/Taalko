@@ -9,79 +9,41 @@
 <style>
   :root { --accent: #D2E3FF; --bg: #0C0D10; --overlay-bg: #181A1F; }
   * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
-  
-  /* Pure body aur html se scrollbar hide karne ke liye */
-  body, html { 
-    background: var(--bg); 
-    color: #fff; 
-    overflow: hidden; 
-    font-family: 'Outfit', sans-serif; 
-    transition: background 0.8s ease; 
-    scrollbar-width: none; /* Firefox */
-    -ms-overflow-style: none;  /* IE and Edge */
-  }
-
-  /* Chrome, Safari aur Opera ke liye scrollbar hide */
-  *::-webkit-scrollbar {
-    display: none;
-  }
-
+  body, html { background: var(--bg); color: #fff; overflow: hidden; font-family: 'Outfit', sans-serif; transition: background 0.8s ease; scrollbar-width: none; -ms-overflow-style: none; }
+  *::-webkit-scrollbar { display: none; }
   .app { width: 100vw; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: space-around; padding: 40px 25px; position: relative; }
-
   .seek-overlay { position: absolute; top: 50%; transform: translateY(-50%); font-size: 40px; color: #fff; opacity: 0; pointer-events: none; transition: 0.3s; z-index: 10; }
   .active-seek { opacity: 1; transform: translateY(-50%) scale(1.2); }
-
   .cover-area { position: relative; width: 100%; max-width: 320px; aspect-ratio: 1/1; }
   .cover-box { width: 100%; height: 100%; border-radius: 40px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.7); }
   .cover-box img { width: 100%; height: 100%; object-fit: cover; }
   .tap-zone { position: absolute; top:0; width: 50%; height: 100%; z-index: 5; }
   .left-zone { left: 0; } .right-zone { right: 0; }
-
   .meta { width: 100%; max-width: 320px; }
   .meta h1 { font-family: 'Montserrat'; font-size: 24px; }
   .meta p { font-size: 16px; color: var(--accent); opacity: 0.8; font-weight: 300; }
   .status-pill { background: rgba(210, 227, 255, 0.15); color: var(--accent); padding: 5px 15px; border-radius: 20px; font-size: 11px; font-weight: bold; margin-top: 15px; display: inline-block; border: 1px solid rgba(210, 227, 255, 0.2); }
-
   .seekbar-box { width: 100%; max-width: 320px; margin: 20px 0; }
   .track { width: 100%; height: 8px; background: rgba(255,255,255,0.1); border-radius: 10px; position: relative; cursor: pointer; }
   .fill { position: absolute; height: 100%; background: var(--accent); border-radius: 10px; width: 0%; pointer-events: none; }
   .fill::after { content: ""; position: absolute; right: -7px; top: -4px; width: 16px; height: 16px; background: #fff; border-radius: 50%; }
   .times { display: flex; justify-content: space-between; margin-top: 10px; font-size: 11px; color: #777; font-weight: bold; }
-
   .controls { display: flex; align-items: center; justify-content: space-between; width: 100%; max-width: 320px; }
   .btn-ui { background: none; border: none; color: #fff; cursor: pointer; transition: 0.2s; }
   .btn-ui .material-symbols-rounded { font-size: 32px; font-variation-settings: 'FILL' 1; }
   .play-btn { width: 80px; height: 80px; background: var(--accent); color: #000; border-radius: 30px; display: flex; align-items: center; justify-content: center; }
   .play-btn .material-symbols-rounded { font-size: 45px; }
-
   .backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.6); display: none; z-index: 15; }
   .backdrop.active { display: block; }
-  .panel { 
-    position: absolute; bottom: -100%; left: 0; width: 100%; height: 85%; 
-    background: var(--overlay-bg); border-radius: 40px 40px 0 0; 
-    transition: 0.5s cubic-bezier(0.1, 0.8, 0.2, 1); z-index: 20; padding: 30px 20px; 
-    scrollbar-width: none; /* Hide for Firefox */
-  }
+  .panel { position: absolute; bottom: -100%; left: 0; width: 100%; height: 85%; background: var(--overlay-bg); border-radius: 40px 40px 0 0; transition: 0.5s cubic-bezier(0.1, 0.8, 0.2, 1); z-index: 20; padding: 30px 20px; }
   .panel.open { bottom: 0; }
   .handle { width: 45px; height: 5px; background: #333; border-radius: 10px; margin: 0 auto 25px; cursor: pointer; }
-
-  /* Grid scrollbar hide */
   .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
   .grid-item { background: #22252C; padding: 15px 5px; border-radius: 15px; text-align: center; border: 1px solid transparent; font-size: 14px; }
   .grid-item.active { background: rgba(210, 227, 255, 0.15); border-color: var(--accent); color: var(--accent); }
   .grid-item b { display: block; font-size: 18px; }
-
-  /* Playlist scrollbar hide */
-  #libList {
-    overflow-y: auto; 
-    height: 85%;
-    scrollbar-width: none; /* Firefox */
-  }
-  #libList::-webkit-scrollbar {
-    display: none; /* Chrome/Safari */
-  }
-
-  .song-row { display: flex; align-items: center; gap: 15px; padding: 12px; border-radius: 20px; margin-bottom: 8px; }
+  #libList { overflow-y: auto; height: 85%; scrollbar-width: none; }
+  .song-row { display: flex; align-items: center; gap: 15px; padding: 12px; border-radius: 20px; margin-bottom: 8px; cursor: pointer;}
   .song-row:active { background: rgba(255,255,255,0.05); }
   .song-row img { width: 50px; height: 50px; border-radius: 15px; }
 </style>
@@ -92,8 +54,8 @@
   <div class="backdrop" id="bgCloser" onclick="closePanels()"></div>
 
   <div class="cover-area" id="swipeArea">
-    <div class="seek-overlay" id="rewindIco" style="left: 20%;"></div>
-    <div class="seek-overlay" id="forwardIco" style="right: 20%;"></div>
+    <div class="seek-overlay" id="rewindIco" style="left: 20%;">fast_rewind</div>
+    <div class="seek-overlay" id="forwardIco" style="right: 20%;">fast_forward</div>
     <div class="tap-zone left-zone" id="tapBack"></div>
     <div class="tap-zone right-zone" id="tapNext"></div>
     <div class="cover-box"><img id="art" src=""></div>
@@ -121,22 +83,13 @@
   <div class="panel" id="sleepPanel">
     <div class="handle" onclick="closePanels()"></div>
     <h2 style="font-family:Montserrat">Sleep Timer</h2>
-    <div class="grid">
+    <div class="grid" id="sleepGrid">
       <div class="grid-item" id="m5" onclick="setSleep('mins', 5)"><b>5</b>min</div>
       <div class="grid-item" id="m10" onclick="setSleep('mins', 10)"><b>10</b>min</div>
       <div class="grid-item" id="m20" onclick="setSleep('mins', 20)"><b>20</b>min</div>
-      <div class="grid-item" id="m25" onclick="setSleep('mins', 25)"><b>25</b>min</div>
       <div class="grid-item" id="m30" onclick="setSleep('mins', 30)"><b>30</b>min</div>
-      <div class="grid-item" id="m40" onclick="setSleep('mins', 40)"><b>40</b>min</div>
-      <div class="grid-item" id="m50" onclick="setSleep('mins', 50)"><b>50</b>min</div>
       <div class="grid-item" id="m60" onclick="setSleep('mins', 60)"><b>60</b>min</div>
-      <div class="grid-item" style="background:#311; color:#f55" onclick="setSleep('off', 0)"><b>OFF</b>Limit</div>
-    </div>
-    <p style="margin: 25px 0 10px; opacity:0.5; font-size:12px;">SET SONG LIMIT</p>
-    <div class="grid">
-        <div class="grid-item" id="s1" onclick="setSleep('songs', 1)"><b>1</b>Song</div>
-        <div class="grid-item" id="s5" onclick="setSleep('songs', 5)"><b>5</b>Songs</div>
-        <div class="grid-item" id="s10" onclick="setSleep('songs', 10)"><b>10</b>Songs</div>
+      <div class="grid-item" style="background:#311; color:#f55" onclick="setSleep('off', 0)"><b>OFF</b></div>
     </div>
   </div>
 
@@ -148,18 +101,22 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/gh/rajmusaic/Taalko@main/data.js"></script>
+
 <script>
   let idx = 0, playing = false;
   let songLimit = 0, songCount = 0, timeEnd = 0;
   const audio = new Audio();
 
+  // Gaana load karne ka function
   function load(n) {
+    if(!songs || songs.length === 0) return;
     const s = songs[n];
     audio.src = s.url;
     document.getElementById("art").src = s.cover;
     document.getElementById("title").innerText = s.name;
     document.getElementById("artist").innerText = s.artist;
-    document.getElementById("mainBG").style.backgroundColor = hsl(${(n*75)%360}, 15%, 7%);
+    // Background color change (fixed syntax)
+    document.getElementById("mainBG").style.backgroundColor = `hsl(${(n*75)%360}, 15%, 7%)`;
   }
 
   function toggle() {
@@ -193,7 +150,11 @@
     audio.currentTime = (e.offsetX / e.currentTarget.offsetWidth) * audio.duration;
   };
 
-  function fmt(s) { let m=Math.floor(s/60), r=Math.floor(s%60); return ${m}:${r<10?'0':''}${r}; }
+  function fmt(s) { 
+    if(isNaN(s)) return "0:00";
+    let m=Math.floor(s/60), r=Math.floor(s%60); 
+    return `${m}:${r<10?'0':''}${r}`; 
+  }
 
   function setSleep(type, val) {
     songLimit = 0; timeEnd = 0; songCount = 0;
@@ -201,68 +162,70 @@
     const pill = document.getElementById("pill");
     if(type === 'mins') {
       timeEnd = Date.now() + (val * 60000);
-      pill.innerText = LIMIT: ${val} MINS;
-      document.getElementById('m'+val).classList.add('active');
+      pill.innerText = `LIMIT: ${val} MINS`;
+      if(document.getElementById('m'+val)) document.getElementById('m'+val).classList.add('active');
     } else if(type === 'songs') {
       songLimit = val;
-      pill.innerText = LIMIT: ${val} SONGS;
-      document.getElementById('s'+val).classList.add('active');
+      pill.innerText = `LIMIT: ${val} SONGS`;
     } else {
       pill.innerText = "LIMIT: OFF";
     }
     setTimeout(closePanels, 300);
   }
 
-  function tapSeek(el, sec, iconId) {
-    let last = 0;
-    el.addEventListener('touchstart', (e) => {
-        let now = Date.now();
-        if(now - last < 300) {
-            audio.currentTime += sec;
-            const ico = document.getElementById(iconId);
-            ico.classList.add('active-seek');
-            setTimeout(() => ico.classList.remove('active-seek'), 500);
-        }
-        last = now;
-    });
-  }
-  tapSeek(document.getElementById("tapBack"), -10, "rewindIco");
-  tapSeek(document.getElementById("tapNext"), 10, "forwardIco");
-
   function openPanel(id) {
     document.getElementById(id).classList.add('open');
     document.getElementById('bgCloser').classList.add('active');
-    history.pushState({panel: id}, "");
   }
+
   function closePanels() {
     document.querySelectorAll('.panel, .backdrop').forEach(el => el.classList.remove('open', 'active'));
   }
 
-  let startX = 0, startY = 0;
-  document.addEventListener('touchstart', e => { startX = e.touches[0].clientX; startY = e.touches[0].clientY; });
-  document.addEventListener('touchend', e => {
-    let endX = e.changedTouches[0].clientX, endY = e.changedTouches[0].clientY;
-    let diffX = startX - endX, diffY = startY - endY;
-    if (Math.abs(diffX) > Math.abs(diffY)) {
-      if (Math.abs(diffX) > 50) { diffX > 0 ? next() : prev(); }
-    } else {
-      if (Math.abs(diffY) > 50) { diffY > 0 ? openPanel('libPanel') : closePanels(); }
-    }
-  });
+  // Double tap to seek logic fixed
+  function setupTapSeek() {
+    let lastL = 0, lastR = 0;
+    document.getElementById("tapBack").onclick = () => {
+        let now = Date.now();
+        if(now - lastL < 300) {
+            audio.currentTime -= 10;
+            showSeekIcon("rewindIco");
+        }
+        lastL = now;
+    };
+    document.getElementById("tapNext").onclick = () => {
+        let now = Date.now();
+        if(now - lastR < 300) {
+            audio.currentTime += 10;
+            showSeekIcon("forwardIco");
+        }
+        lastR = now;
+    };
+  }
 
-  window.onpopstate = () => closePanels();
+  function showSeekIcon(id) {
+    const ico = document.getElementById(id);
+    ico.classList.add('active-seek');
+    setTimeout(() => ico.classList.remove('active-seek'), 600);
+  }
 
+  // Data load hone par playlist banana
   window.onload = () => {
-    load(idx);
-    songs.forEach((s, i) => {
-      const row = document.createElement("div");
-      row.className = "song-row";
-      row.innerHTML = <img src="${s.cover}"><div><b>${s.name}</b><br><small style="opacity:0.5">${s.artist}</small></div>;
-      row.onclick = () => { idx=i; load(i); toggle(); closePanels(); };
-      document.getElementById("libList").appendChild(row);
-    });
+    if(typeof songs !== 'undefined') {
+        load(idx);
+        const list = document.getElementById("libList");
+        songs.forEach((s, i) => {
+          const row = document.createElement("div");
+          row.className = "song-row";
+          row.innerHTML = `<img src="${s.cover}"><div><b>${s.name}</b><br><small style="opacity:0.5">${s.artist}</small></div>`;
+          row.onclick = () => { idx=i; load(i); if(!playing) toggle(); else audio.play(); closePanels(); };
+          list.appendChild(row);
+        });
+        setupTapSeek();
+    } else {
+        document.getElementById("title").innerText = "Data Not Found!";
+    }
   };
 </script>
 </body>
 </html>
-
