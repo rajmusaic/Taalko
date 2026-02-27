@@ -3,331 +3,265 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Music Player (Only Image Background)</title>
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-
+<title>Pro Android Player Final</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0" />
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Outfit:wght@300;500&display=swap" rel="stylesheet">
 <style>
-  *{margin:0;padding:0;box-sizing:border-box;font-family: Arial;}
-  body{overflow:hidden;}
-
-  .app{
-    position:relative;
-    width:100vw;
-    height:100vh;
-    overflow:hidden;
-  }
-.btn{
-  width:65px;
-  height:65px;
-  border-radius:50%;
-  border:none;
-  background: rgba(0,0,0,0.4);
-  color:#fff;
-  font-size:25px;
-  cursor:pointer;
-  transition: transform .2s ease, background .2s ease;
-  box-shadow: 0 10px 20px rgba(0,0,0,0.4);
-
-  outline: none;                    /* remove outline */
-  box-shadow: none !important;      /* remove blue shadow */
-  -webkit-tap-highlight-color: transparent;  /* remove mobile blue */
-}
-  /* BACKGROUND IMAGE ONLY */
-  .bgImage{
-    position:absolute; inset:0;
-    background-size:cover;
-    background-position:center;
-    opacity:1;
+  :root { --accent: #D2E3FF; --bg: #0C0D10; --overlay-bg: #181A1F; }
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
+  
+  /* Pure body aur html se scrollbar hide karne ke liye */
+  body, html { 
+    background: var(--bg); 
+    color: #fff; 
+    overflow: hidden; 
+    font-family: 'Outfit', sans-serif; 
+    transition: background 0.8s ease; 
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none;  /* IE and Edge */
   }
 
-  /* Player */
-  .player{
-    position:absolute; inset:0;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    transition: transform 0.6s cubic-bezier(.2,.8,.2,1);
-    z-index:2;
-    background: rgba(0,0,0,0.4);
-    backdrop-filter: blur(4px);
+  /* Chrome, Safari aur Opera ke liye scrollbar hide */
+  *::-webkit-scrollbar {
+    display: none;
   }
 
-  .cover{
-    width:260px;
-    height:260px;
-    overflow:hidden;
-    box-shadow:0 20px 40px rgba(0,0,0,0.6);
-    margin-bottom:20px;
-    border-radius:0px;
-    border: 4px solid rgba(255,255,255,0.2);
+  .app { width: 100vw; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: space-around; padding: 40px 25px; position: relative; }
+
+  .seek-overlay { position: absolute; top: 50%; transform: translateY(-50%); font-size: 40px; color: #fff; opacity: 0; pointer-events: none; transition: 0.3s; z-index: 10; }
+  .active-seek { opacity: 1; transform: translateY(-50%) scale(1.2); }
+
+  .cover-area { position: relative; width: 100%; max-width: 320px; aspect-ratio: 1/1; }
+  .cover-box { width: 100%; height: 100%; border-radius: 40px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.7); }
+  .cover-box img { width: 100%; height: 100%; object-fit: cover; }
+  .tap-zone { position: absolute; top:0; width: 50%; height: 100%; z-index: 5; }
+  .left-zone { left: 0; } .right-zone { right: 0; }
+
+  .meta { width: 100%; max-width: 320px; }
+  .meta h1 { font-family: 'Montserrat'; font-size: 24px; }
+  .meta p { font-size: 16px; color: var(--accent); opacity: 0.8; font-weight: 300; }
+  .status-pill { background: rgba(210, 227, 255, 0.15); color: var(--accent); padding: 5px 15px; border-radius: 20px; font-size: 11px; font-weight: bold; margin-top: 15px; display: inline-block; border: 1px solid rgba(210, 227, 255, 0.2); }
+
+  .seekbar-box { width: 100%; max-width: 320px; margin: 20px 0; }
+  .track { width: 100%; height: 8px; background: rgba(255,255,255,0.1); border-radius: 10px; position: relative; cursor: pointer; }
+  .fill { position: absolute; height: 100%; background: var(--accent); border-radius: 10px; width: 0%; pointer-events: none; }
+  .fill::after { content: ""; position: absolute; right: -7px; top: -4px; width: 16px; height: 16px; background: #fff; border-radius: 50%; }
+  .times { display: flex; justify-content: space-between; margin-top: 10px; font-size: 11px; color: #777; font-weight: bold; }
+
+  .controls { display: flex; align-items: center; justify-content: space-between; width: 100%; max-width: 320px; }
+  .btn-ui { background: none; border: none; color: #fff; cursor: pointer; transition: 0.2s; }
+  .btn-ui .material-symbols-rounded { font-size: 32px; font-variation-settings: 'FILL' 1; }
+  .play-btn { width: 80px; height: 80px; background: var(--accent); color: #000; border-radius: 30px; display: flex; align-items: center; justify-content: center; }
+  .play-btn .material-symbols-rounded { font-size: 45px; }
+
+  .backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.6); display: none; z-index: 15; }
+  .backdrop.active { display: block; }
+  .panel { 
+    position: absolute; bottom: -100%; left: 0; width: 100%; height: 85%; 
+    background: var(--overlay-bg); border-radius: 40px 40px 0 0; 
+    transition: 0.5s cubic-bezier(0.1, 0.8, 0.2, 1); z-index: 20; padding: 30px 20px; 
+    scrollbar-width: none; /* Hide for Firefox */
   }
-  .cover img{
-    width:100%;
-    height:100%;
-    object-fit:cover;
-    border-radius:0px;
+  .panel.open { bottom: 0; }
+  .handle { width: 45px; height: 5px; background: #333; border-radius: 10px; margin: 0 auto 25px; cursor: pointer; }
+
+  /* Grid scrollbar hide */
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
+  .grid-item { background: #22252C; padding: 15px 5px; border-radius: 15px; text-align: center; border: 1px solid transparent; font-size: 14px; }
+  .grid-item.active { background: rgba(210, 227, 255, 0.15); border-color: var(--accent); color: var(--accent); }
+  .grid-item b { display: block; font-size: 18px; }
+
+  /* Playlist scrollbar hide */
+  #libList {
+    overflow-y: auto; 
+    height: 85%;
+    scrollbar-width: none; /* Firefox */
+  }
+  #libList::-webkit-scrollbar {
+    display: none; /* Chrome/Safari */
   }
 
-  .songInfo{
-    text-align:center;
-    color:#fff;
-    margin-bottom:10px;
-  }
-  .songInfo h2{font-size:22px;}
-  .songInfo p{font-size:14px; color:#ddd;}
-
-  .seek{
-    width:90%;
-    margin:10px 0;
-  }
-  input[type="range"]{
-    width:100%;
-    accent-color:#00d4ff;
-  }
-
-  .time{
-    width: 90%;
-    display:flex;
-    justify-content:space-between;
-    font-size:12px;
-    color:#ddd;
-  }
-
-  .controls{
-    display:flex;
-    gap:40px;
-    margin-top:15px;
-  }
-  .btn{
-    width:65px; height:65px;
-    border-radius:50%;
-    border:none;
-    background: rgba(0,0,0,0.4);
-    color:#fff;
-    font-size:25px;
-    cursor:pointer;
-    transition: transform .2s ease, background .2s ease;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.4);
-  }
-  .btn:hover{transform:scale(1.08); background: rgba(0,0,0,0.6);}
-  .btn.playing{background: linear-gradient(135deg, #000, #00d4ff);}
-
-  /* Song list */
-  .list{
-    position:absolute;
-    top:100%;
-    left:0;
-    width:100%;
-    height:100%;
-    padding:20px;
-    overflow:auto;
-    z-index:3;
-    background: rgba(0,0,0,0.45);
-    backdrop-filter: blur(8px);
-    transition: transform 0.6s cubic-bezier(.2,.8,.2,1);
-  }
-  .list h2{
-    color:#fff;
-    margin-bottom:15px;
-  }
-  .song{
-    display:flex;
-    align-items:center;
-    gap:15px;
-    padding:15px;
-    border-bottom:1px solid rgba(255,255,255,0.15);
-    cursor:pointer;
-  }
-  .song:hover{background: rgba(255,255,255,0.08);}
-  .song img{width:50px;height:50px;border-radius:12px;}
-  .song .info strong{color:#fff;}
-  .song .info span{color:#ddd; font-size:12px;}
+  .song-row { display: flex; align-items: center; gap: 15px; padding: 12px; border-radius: 20px; margin-bottom: 8px; }
+  .song-row:active { background: rgba(255,255,255,0.05); }
+  .song-row img { width: 50px; height: 50px; border-radius: 15px; }
 </style>
 </head>
-<body>
+<body id="mainBG">
 
 <div class="app">
+  <div class="backdrop" id="bgCloser" onclick="closePanels()"></div>
 
-  <!-- BACKGROUND IMAGE -->
-  <div class="bgImage" id="bgImage"></div>
+  <div class="cover-area" id="swipeArea">
+    <div class="seek-overlay" id="rewindIco" style="left: 20%;"></div>
+    <div class="seek-overlay" id="forwardIco" style="right: 20%;"></div>
+    <div class="tap-zone left-zone" id="tapBack"></div>
+    <div class="tap-zone right-zone" id="tapNext"></div>
+    <div class="cover-box"><img id="art" src=""></div>
+  </div>
 
-  <!-- Player -->
-  <div class="player" id="player">
-    <div class="cover">
-      <img id="coverImg" src="https://via.placeholder.com/250" alt="Cover" />
+  <div class="meta">
+    <h1 id="title">Loading...</h1>
+    <p id="artist">Artist</p>
+    <div class="status-pill" id="pill">LIMIT: OFF</div>
+  </div>
+
+  <div class="seekbar-box">
+    <div class="track" id="rail"><div class="fill" id="fill"></div></div>
+    <div class="times"><span id="curr">0:00</span><span id="dur">0:00</span></div>
+  </div>
+
+  <div class="controls">
+    <button class="btn-ui" onclick="openPanel('sleepPanel')"><span class="material-symbols-rounded">more_time</span></button>
+    <button class="btn-ui" onclick="prev()"><span class="material-symbols-rounded">skip_previous</span></button>
+    <button class="btn-ui play-btn" onclick="toggle()"><span class="material-symbols-rounded" id="pIco">play_arrow</span></button>
+    <button class="btn-ui" onclick="next()"><span class="material-symbols-rounded">skip_next</span></button>
+    <button class="btn-ui" onclick="openPanel('libPanel')"><span class="material-symbols-rounded">sort</span></button>
+  </div>
+
+  <div class="panel" id="sleepPanel">
+    <div class="handle" onclick="closePanels()"></div>
+    <h2 style="font-family:Montserrat">Sleep Timer</h2>
+    <div class="grid">
+      <div class="grid-item" id="m5" onclick="setSleep('mins', 5)"><b>5</b>min</div>
+      <div class="grid-item" id="m10" onclick="setSleep('mins', 10)"><b>10</b>min</div>
+      <div class="grid-item" id="m20" onclick="setSleep('mins', 20)"><b>20</b>min</div>
+      <div class="grid-item" id="m25" onclick="setSleep('mins', 25)"><b>25</b>min</div>
+      <div class="grid-item" id="m30" onclick="setSleep('mins', 30)"><b>30</b>min</div>
+      <div class="grid-item" id="m40" onclick="setSleep('mins', 40)"><b>40</b>min</div>
+      <div class="grid-item" id="m50" onclick="setSleep('mins', 50)"><b>50</b>min</div>
+      <div class="grid-item" id="m60" onclick="setSleep('mins', 60)"><b>60</b>min</div>
+      <div class="grid-item" style="background:#311; color:#f55" onclick="setSleep('off', 0)"><b>OFF</b>Limit</div>
     </div>
-
-    <div class="songInfo">
-      <h2 id="songTitle">Song 1</h2>
-      <p id="songArtist">Artist 1</p>
-    </div>
-
-    <div class="seek">
-      <input type="range" id="seekBar" min="0" max="100" value="0">
-    </div>
-
-    <div class="time">
-      <span id="currentTime">00:00</span>
-      <span id="totalTime">00:00</span>
-    </div>
-
-    <div class="controls">
-      <button class="btn" id="prev"><i class="fa-solid fa-backward-step"></i></button>
-      <button class="btn" id="play"><i class="fa-solid fa-play"></i></button>
-      <button class="btn" id="next"><i class="fa-solid fa-forward-step"></i></button>
+    <p style="margin: 25px 0 10px; opacity:0.5; font-size:12px;">SET SONG LIMIT</p>
+    <div class="grid">
+        <div class="grid-item" id="s1" onclick="setSleep('songs', 1)"><b>1</b>Song</div>
+        <div class="grid-item" id="s5" onclick="setSleep('songs', 5)"><b>5</b>Songs</div>
+        <div class="grid-item" id="s10" onclick="setSleep('songs', 10)"><b>10</b>Songs</div>
     </div>
   </div>
 
-  <!-- Song List -->
-  <div class="list" id="list">
-    <h2>Song List</h2>
-    <div id="songList"></div>
+  <div class="panel" id="libPanel">
+    <div class="handle" onclick="closePanels()"></div>
+    <h2 style="font-family:Montserrat; margin-bottom:20px;">Playlist</h2>
+    <div id="libList"></div>
   </div>
-
 </div>
 
-<!-- IMPORT SONGS FROM songs.js -->
-<script src="s.js"></script>
-
+<script src="data.js"></script>
 <script>
-  /*************** ADMIN CONFIG (Only Code Change) ***************/
-  const adminConfig = {
-    bgImageUrl: "5.jpg"
-  };
-  /************************************************************/
-
-  // Apply background image
-  document.getElementById("bgImage").style.backgroundImage = url(${adminConfig.bgImageUrl});
-
-  // SONGS DATA (Now imported from songs.js)
-  let currentIndex = 0;
-  let isPlaying = false;
-
+  let idx = 0, playing = false;
+  let songLimit = 0, songCount = 0, timeEnd = 0;
   const audio = new Audio();
-  const coverImg = document.getElementById("coverImg");
-  const playBtn = document.getElementById("play");
-  const prevBtn = document.getElementById("prev");
-  const nextBtn = document.getElementById("next");
-  const seekBar = document.getElementById("seekBar");
-  const songList = document.getElementById("songList");
 
-  const songTitle = document.getElementById("songTitle");
-  const songArtist = document.getElementById("songArtist");
-  const currentTimeEl = document.getElementById("currentTime");
-  const totalTimeEl = document.getElementById("totalTime");
-
-  const player = document.getElementById("player");
-  const list = document.getElementById("list");
-
-  function loadSong(index){
-    const song = songs[index];
-    audio.src = song.url;
-    coverImg.src = song.cover;
-    songTitle.innerText = song.title;
-    songArtist.innerText = song.artist;
+  function load(n) {
+    const s = songs[n];
+    audio.src = s.url;
+    document.getElementById("art").src = s.cover;
+    document.getElementById("title").innerText = s.name;
+    document.getElementById("artist").innerText = s.artist;
+    document.getElementById("mainBG").style.backgroundColor = hsl(${(n*75)%360}, 15%, 7%);
   }
 
-  function formatTime(sec){
-    const minutes = Math.floor(sec / 60);
-    const seconds = Math.floor(sec % 60);
-    return ${minutes < 10 ? "0"+minutes : minutes}:${seconds < 10 ? "0"+seconds : seconds};
+  function toggle() {
+    const ico = document.getElementById("pIco");
+    if(playing) { audio.pause(); ico.innerText="play_arrow"; }
+    else { audio.play(); ico.innerText="pause"; }
+    playing = !playing;
   }
 
-  function playPause(){
-    if(!isPlaying){
-      audio.play();
-      isPlaying = true;
-      playBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
-      playBtn.classList.add("playing");
+  audio.onended = () => {
+    if(songLimit > 0) {
+      songCount++;
+      if(songCount >= songLimit) { stopAll(); return; }
+    }
+    next();
+  };
+
+  function next() { idx=(idx+1)%songs.length; load(idx); if(playing) audio.play(); }
+  function prev() { idx=(idx-1+songs.length)%songs.length; load(idx); if(playing) audio.play(); }
+  function stopAll() { audio.pause(); playing=false; document.getElementById("pIco").innerText="play_arrow"; setSleep('off',0); }
+
+  audio.ontimeupdate = () => {
+    const p = (audio.currentTime / audio.duration) * 100;
+    document.getElementById("fill").style.width = p + "%";
+    document.getElementById("curr").innerText = fmt(audio.currentTime);
+    document.getElementById("dur").innerText = fmt(audio.duration);
+    if(timeEnd > 0 && Date.now() >= timeEnd) stopAll();
+  };
+
+  document.getElementById("rail").onclick = (e) => {
+    audio.currentTime = (e.offsetX / e.currentTarget.offsetWidth) * audio.duration;
+  };
+
+  function fmt(s) { let m=Math.floor(s/60), r=Math.floor(s%60); return ${m}:${r<10?'0':''}${r}; }
+
+  function setSleep(type, val) {
+    songLimit = 0; timeEnd = 0; songCount = 0;
+    document.querySelectorAll('.grid-item').forEach(i => i.classList.remove('active'));
+    const pill = document.getElementById("pill");
+    if(type === 'mins') {
+      timeEnd = Date.now() + (val * 60000);
+      pill.innerText = LIMIT: ${val} MINS;
+      document.getElementById('m'+val).classList.add('active');
+    } else if(type === 'songs') {
+      songLimit = val;
+      pill.innerText = LIMIT: ${val} SONGS;
+      document.getElementById('s'+val).classList.add('active');
     } else {
-      audio.pause();
-      isPlaying = false;
-      playBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
-      playBtn.classList.remove("playing");
+      pill.innerText = "LIMIT: OFF";
     }
+    setTimeout(closePanels, 300);
   }
 
-  function nextSong(){
-    currentIndex = (currentIndex + 1) % songs.length;
-    loadSong(currentIndex);
-    if(isPlaying) audio.play();
-  }
-
-  function prevSong(){
-    currentIndex = (currentIndex - 1 + songs.length) % songs.length;
-    loadSong(currentIndex);
-    if(isPlaying) audio.play();
-  }
-
-  audio.addEventListener("timeupdate", () => {
-    const progress = (audio.currentTime / audio.duration) * 100;
-    seekBar.value = progress || 0;
-    currentTimeEl.innerText = formatTime(audio.currentTime);
-  });
-
-  audio.addEventListener("loadedmetadata", () => {
-    totalTimeEl.innerText = formatTime(audio.duration);
-  });
-
-  // AUTO NEXT SONG AFTER COMPLETE
-  audio.addEventListener("ended", nextSong);
-
-  seekBar.addEventListener("input", () => {
-    audio.currentTime = (seekBar.value / 100) * audio.duration;
-  });
-
-  songs.forEach((song, index) => {
-    const div = document.createElement("div");
-    div.className = "song";
-    div.innerHTML = 
-      <img src="${song.cover}" alt="cover">
-      <div class="info">
-        <strong>${song.title}</strong>
-        <span>${song.artist}</span>
-      </div>
-    ;
-    div.addEventListener("click", () => {
-      currentIndex = index;
-      loadSong(currentIndex);
-      audio.play();
-      isPlaying = true;
-      playBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
-      playBtn.classList.add("playing");
+  function tapSeek(el, sec, iconId) {
+    let last = 0;
+    el.addEventListener('touchstart', (e) => {
+        let now = Date.now();
+        if(now - last < 300) {
+            audio.currentTime += sec;
+            const ico = document.getElementById(iconId);
+            ico.classList.add('active-seek');
+            setTimeout(() => ico.classList.remove('active-seek'), 500);
+        }
+        last = now;
     });
-    songList.appendChild(div);
-  });
+  }
+  tapSeek(document.getElementById("tapBack"), -10, "rewindIco");
+  tapSeek(document.getElementById("tapNext"), 10, "forwardIco");
 
-  loadSong(currentIndex);
+  function openPanel(id) {
+    document.getElementById(id).classList.add('open');
+    document.getElementById('bgCloser').classList.add('active');
+    history.pushState({panel: id}, "");
+  }
+  function closePanels() {
+    document.querySelectorAll('.panel, .backdrop').forEach(el => el.classList.remove('open', 'active'));
+  }
 
-  playBtn.addEventListener("click", playPause);
-  nextBtn.addEventListener("click", nextSong);
-  prevBtn.addEventListener("click", prevSong);
-
-  // SWIPE
-  let startY = 0;
-  let isListOpen = false;
-
-  document.addEventListener("touchstart", (e) => {
-    startY = e.touches[0].clientY;
-  });
-
-  document.addEventListener("touchend", (e) => {
-    const endY = e.changedTouches[0].clientY;
-    const diff = endY - startY;
-
-    if(diff > 50 && !isListOpen){
-      player.style.transform = "translateY(-100%)";
-      list.style.transform = "translateY(-100%)";
-      isListOpen = true;
-    } else if(diff < -50 && isListOpen){
-      player.style.transform = "translateY(0)";
-      list.style.transform = "translateY(0)";
-      isListOpen = false;
+  let startX = 0, startY = 0;
+  document.addEventListener('touchstart', e => { startX = e.touches[0].clientX; startY = e.touches[0].clientY; });
+  document.addEventListener('touchend', e => {
+    let endX = e.changedTouches[0].clientX, endY = e.changedTouches[0].clientY;
+    let diffX = startX - endX, diffY = startY - endY;
+    if (Math.abs(diffX) > Math.abs(diffY)) {
+      if (Math.abs(diffX) > 50) { diffX > 0 ? next() : prev(); }
+    } else {
+      if (Math.abs(diffY) > 50) { diffY > 0 ? openPanel('libPanel') : closePanels(); }
     }
   });
-</script>
 
+  window.onpopstate = () => closePanels();
+
+  window.onload = () => {
+    load(idx);
+    songs.forEach((s, i) => {
+      const row = document.createElement("div");
+      row.className = "song-row";
+      row.innerHTML = <img src="${s.cover}"><div><b>${s.name}</b><br><small style="opacity:0.5">${s.artist}</small></div>;
+      row.onclick = () => { idx=i; load(i); toggle(); closePanels(); };
+      document.getElementById("libList").appendChild(row);
+    });
+  };
+</script>
 </body>
 </html>
