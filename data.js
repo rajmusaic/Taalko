@@ -4,7 +4,7 @@ const songs = [
     name: "Bul Bul",
     artist: "Muhfaad",
     url: "https://raw.githubusercontent.com/rajmusaic/song_2x/main/bulbul_2x.mp3",
-    cover: "https://files.catbox.moe/kwmp7q.png"
+    cover: "https://files.catbox.moe/1qu68f.jpg"
   },
   {
     name: "EK THA RAJA",
