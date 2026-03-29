@@ -64,6 +64,6 @@ const songs = [
     name: "TFBOL",
     artist: "Emiway bantai",
     url: "https://raw.githubusercontent.com/rajmusaic/song_2x/main/TFBOL.MP3",
-    cover: "https://files.catbox.moe/lfri8k.jpg"
+    cover: "https://files.catbox.moe/3ee3wl.jpg"
   }
 ];
