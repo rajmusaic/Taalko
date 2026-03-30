@@ -66,5 +66,11 @@ const songs = [
     url: "https://raw.githubusercontent.com/rajmusaic/song_2x/main/TFBOL.MP3",
     cover:
 "https://files.catbox.moe/3ee3wl.jpg"
+  },
+{
+    name: "Nateejay",
+    artist: "Muhfaad",
+    url: "",
+    cover: "https://files.catbox.moe/dr4vq4.jpg"
   }
 ];
