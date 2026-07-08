@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+        if (window.innerWidth < 1024) {
+            window.location.replace("index.html" + window.location.search + window.location.hash);
+        }
+    </script>
+    <title>ielite desktop </title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+        
+        /* HIDE SCROLLBAR */
+        ::-webkit-scrollbar { display: none; }
+        * { scrollbar-width: none; -ms-overflow-style: none; }
+
+        body { background-color: #000; color: #fff; height: 100vh; padding: 8px; display: flex; flex-direction: column; gap: 8px; overflow: hidden; }
+        
+        #bg-blur { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; filter: blur(100px); opacity: 0.4; transition: background 0.6s ease; background-size: cover; background-position: center; }
+        
+        .top-section { display: flex; gap: 8px; flex: 1; height: calc(100vh - 104px); }
+        .panel { background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(40px); border-radius: 24px; border: 1px solid rgba(255, 255, 255, 0.05); }
+        
+        .sidebar { width: 280px; padding: 32px; display: flex; flex-direction: column; gap: 10px; }
+        .nav-link { color: #888; text-decoration: none; font-weight: 600; padding: 12px; border-radius: 12px; transition: 0.2s; }
+        .nav-link:hover { background: rgba(255,255,255,0.05); color: #fff; }
+
+        .main-view { flex: 1; padding: 32px 40px; overflow-y: auto; }
+        .search-bar { width: 100%; max-width: 400px; background: rgba(255,255,255,0.05); padding: 12px 20px; border-radius: 12px; color: #fff; margin-bottom: 30px; border: none; outline: none; }
+        
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
+        .track-card { background: rgba(255, 255, 255, 0.03); padding: 16px; border-radius: 20px; cursor: pointer; transition: 0.3s; }
+        .track-card:hover { background: rgba(255, 255, 255, 0.08); transform: scale(1.02); }
+        .card-img { width: 100%; aspect-ratio: 1; border-radius: 12px; object-fit: cover; margin-bottom: 16px; }
+        
+        .player-panel { height: 96px; display: flex; justify-content: space-between; align-items: center; padding: 0 30px; }
+        .main-play-btn { width: 45px; height: 45px; border-radius: 50%; background: #fff; border: none; cursor: pointer; }
+        .controls { display: flex; gap: 20px; align-items: center; }
+    </style>
+</head>
+<body>
+    <div id="bg-blur"></div>
+
+    <div class="top-section">
+        <aside class="panel sidebar">
+            <div style="font-size:24px; font-weight:800; margin-bottom:20px;"><i class="fa-solid fa-compact-disc"></i> ielite</div>
+        </aside>
+
+        <main class="panel main-view">
+            <input type="text" id="search" class="search-bar" placeholder="Search your vibe...">
+            <div class="card-grid" id="song-grid"></div>
+        </main>
+    </div>
+
+    <div class="panel player-panel">
+        <div style="display:flex; align-items:center; gap:16px;">
+            <img id="np-img" src="" style="width:56px; height:56px; border-radius:12px; object-fit:cover;">
+            <div><h4 id="np-title">Select a track</h4><p id="np-artist" style="color:#888;">...</p></div>
+        </div>
+        <div class="controls">
+            <button class="main-play-btn" id="prev"><i class="fa-solid fa-backward"></i></button>
+            <button class="main-play-btn" id="play-pause"><i class="fa-solid fa-play" id="play-icon"></i></button>
+            <button class="main-play-btn" id="next"><i class="fa-solid fa-forward"></i></button>
+        </div>
+    </div>
+
+    <script src="./data.js"></script>
+    <script>
+        const audio = new Audio();
+        let currentIndex = 0;
+        let isPlaying = false;
+        const grid = document.getElementById('song-grid');
+
+        function playTrack(index) {
+            const song = songs[index];
+            currentIndex = index;
+            document.getElementById('np-title').innerText = song.name;
+            document.getElementById('np-artist').innerText = song.artist;
+            document.getElementById('np-img').src = song.cover;
+            document.getElementById('bg-blur').style.backgroundImage = `url('${song.cover}')`;
+            audio.src = song.url;
+            audio.play();
+            document.getElementById('play-icon').className = 'fa-solid fa-pause';
+            isPlaying = true;
+            localStorage.setItem('lastPlayed', index);
+        }
+
+        function render(filter = "") {
+            grid.innerHTML = '';
+            songs.forEach((s, i) => {
+                if(s.name.toLowerCase().includes(filter.toLowerCase())) {
+                    const card = document.createElement('div');
+                    card.className = 'track-card';
+                    card.innerHTML = `<img src="${s.cover}" class="card-img"><h4>${s.name}</h4><p>${s.artist}</p>`;
+                    card.onclick = () => playTrack(i);
+                    grid.appendChild(card);
+                }
+            });
+        }
+
+        document.getElementById('search').addEventListener('input', (e) => render(e.target.value));
+        document.getElementById('play-pause').onclick = () => {
+            isPlaying ? audio.pause() : audio.play();
+            document.getElementById('play-icon').className = isPlaying ? 'fa-solid fa-play' : 'fa-solid fa-pause';
+            isPlaying = !isPlaying;
+        };
+        document.getElementById('next').onclick = () => playTrack((currentIndex + 1) % songs.length);
+        document.getElementById('prev').onclick = () => playTrack((currentIndex - 1 + songs.length) % songs.length);
+
+        window.onload = () => { render(); playTrack(localStorage.getItem('lastPlayed') || 0); audio.pause(); };
+    </script>
+</body>
+</html>
